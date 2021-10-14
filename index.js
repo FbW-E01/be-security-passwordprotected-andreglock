@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import checkPass from './pass.js';
+import basicAuth from 'express-basic-auth';
 
 const app = express();
 dotenv.config();
@@ -10,13 +11,36 @@ const messages = [];
 
 app.use(express.json());
 
+
 // Endpoint to check if message was saved:
 app.get('/check', (req, res) => {
     res.send(messages);
 });
 
-// Password from Header:
+// Basic auth:
+app.use(basicAuth({
+    users: { "user": process.env.PASSWORD },
+    unauthorizedResponse: 'Must provide a correct password'
+}));
+
+// After basic auth passes:
 app.use('/', async (req, res) => {
+    try {
+        if (!req.body.message) {
+            res.status(400);
+            res.send("Please provide a message");
+            return;
+        }
+        messages.push(req.body.message)
+        res.send(`Message: ${req.body.message} saved`);
+    } catch (error) {
+        console.log(error)
+        res.status(404);
+    }
+})
+
+// Password from Header:
+/* app.use('/', async (req, res) => {
     const pass = req.headers.authorization;
     
     try {
@@ -31,7 +55,7 @@ app.use('/', async (req, res) => {
             return;
         }
         if (!await checkPass(pass)) {
-            res.status(400);
+            res.status(401);
             res.send("Password is incorrect");
             return;
         }
@@ -41,7 +65,7 @@ app.use('/', async (req, res) => {
         console.log(error)
         res.status(404);
     }
-})
+}) */
 
 // Password from url query string:
 /* app.use('/', async (req, res) => {
@@ -58,7 +82,7 @@ app.use('/', async (req, res) => {
             return;
         }
         if (!await checkPass(pass)) {
-            res.status(400);
+            res.status(401);
             res.send("Password is incorrect");
             return;
         }
@@ -84,7 +108,7 @@ app.use('/', async (req, res) => {
             return;
         }
         if (!await checkPass(req.params.pass)) {
-            res.status(400);
+            res.status(401);
             res.send("Password is incorrect");
             return;
         }
@@ -112,7 +136,7 @@ app.use('/', async (req, res) => {
             return;
         }
         if (!await checkPass(req.body.password)) {
-            res.status(400);
+            res.status(401);
             res.send("Password is incorrect");
             return;
         }
