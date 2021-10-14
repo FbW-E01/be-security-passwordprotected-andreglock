@@ -1,0 +1,29 @@
+GET http://localhost:8080/check
+
+###
+
+PATCH http://localhost:8080/
+Content-Type: application/json
+
+{
+    "message": "Another message for you sir!"
+}
+
+###
+
+TRACE http://localhost:8080/
+Content-Type: application/json
+Authorization: password
+
+{
+    "message": "Message for you sir!"
+}
+
+###
+
+TRACE http://localhost:8080/
+Content-Type: application/json
+
+{
+    "notMessage": "Message for you sir!"
+}
